@@ -19,11 +19,19 @@ services:
       interval: 5s
       retries: 10
 
-  application:
+  adminer:
+    image: adminer:latest
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - 8000:8080
+
+  app:
     build:
       context: ./
       dockerfile: ./Dockerfile
-    container_name: application
+    container_name: app
     environment:
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
