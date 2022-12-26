@@ -14,18 +14,21 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=some_secret
+    volumes:
+      - ./dbinit.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready" ]
       interval: 5s
       retries: 10
 
-  adminer:
-    image: adminer:latest
-    restart: always
+  web:
+    image: nginx:1.23.3-alpine
     depends_on:
-      - postgres
+      - app
+    volumes:
+    - ./nginx.conf:/etc/nginx/templates/default.conf.template
     ports:
-      - 8000:8080
+    - 3000:3000
 
   app:
     build:
@@ -40,8 +43,8 @@ services:
       - POSTGRES_DB=postgres
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-    ports:
-      - 3000:3000
+    expose:
+      - 1234
     depends_on:
       postgres:
         condition: service_healthy
